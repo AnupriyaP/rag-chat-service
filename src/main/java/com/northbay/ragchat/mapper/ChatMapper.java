@@ -18,7 +18,9 @@ import java.util.List;
 public interface ChatMapper {
 
     // Chat Session mappings
+    @Mapping(source = "createdAt", target = "createdAt")
     ChatSessionDTO toSessionDTO(ChatSession entity);
+
     List<ChatSessionDTO> toSessionDTOList(List<ChatSession> entities);
 
     // Chat Message mapping

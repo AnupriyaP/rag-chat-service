@@ -2,6 +2,8 @@ package com.northbay.ragchat.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -21,7 +23,22 @@ public class ChatSession {
     private String owner;
     private Boolean favorite;
 
-    private OffsetDateTime createdAt = OffsetDateTime.now();
+    //private OffsetDateTime createdAt = OffsetDateTime.now();
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
+
+    private Instant updatedAt;
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = Instant.now();
+    }
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = Instant.now();  // automatically set timestamp when saving
+    }
+
 
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatMessage> messages;
