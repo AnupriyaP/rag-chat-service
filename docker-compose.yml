@@ -1,0 +1,104 @@
+# ----------------------------------------------------------
+# DOCKER COMPOSE – RAG CHAT SERVICE + MONITORING STACK
+# ----------------------------------------------------------
+
+services:
+  # --------------------------
+  # DATABASE SERVICES
+  # --------------------------
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: raguser
+      POSTGRES_PASSWORD: ragpass
+      POSTGRES_DB: rag_chat_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - monitor_net
+
+  pgadmin:
+    image: dpage/pgadmin4:8
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+    networks:
+      - monitor_net
+
+  # --------------------------
+  # APP SERVICE
+  # --------------------------
+  app:
+    build: .
+    image: northbay/ragchat-app:latest
+    ports:
+      - "8081:8081"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    networks:
+      - monitor_net
+
+  # --------------------------
+  # MONITORING STACK
+  # --------------------------
+  loki:
+    image: grafana/loki:2.9.3
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/config.yml
+    volumes:
+      - ./loki-config.yml:/etc/loki/config.yml:ro
+      - loki_data:/loki
+    networks:
+      - monitor_net
+
+  promtail:
+    image: grafana/promtail:2.9.3
+    container_name: promtail
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - loki
+    networks:
+      - monitor_net
+
+  grafana:
+    image: grafana/grafana:10.3.3
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    depends_on:
+      - loki
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - monitor_net
+
+# --------------------------
+# VOLUMES
+# --------------------------
+volumes:
+  postgres_data:
+  loki_data:
+  grafana_data:
+
+# --------------------------
+# NETWORKS
+# --------------------------
+networks:
+  monitor_net:
+    driver: bridge

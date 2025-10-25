@@ -1,0 +1,32 @@
+<configuration>
+    <springProfile name="!test">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <timestamp/>
+                    <pattern>
+                        <pattern>
+                            {
+                            "logger":"%logger",
+                            "thread":"%thread",
+                            "level":"%level",
+                            "message":"%message",
+                            "request_id":"%mdc{request_id:-}",
+                            "method":"%mdc{method:-}",
+                            "path":"%mdc{path:-}",
+                            "status":"%mdc{status:-}",
+                            "duration_ms":"%mdc{duration_ms:-}"
+                            }
+                        </pattern>
+                    </pattern>
+                    <arguments/>
+                    <stackTrace/>
+                </providers>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+        </root>
+    </springProfile>
+</configuration>

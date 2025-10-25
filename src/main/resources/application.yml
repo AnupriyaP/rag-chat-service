@@ -1,0 +1,38 @@
+server:
+  port: 8081
+
+app:
+  # read from environment variable API_KEYS (or APP_API_KEYS) — default to demo-key
+  api-keys: ${API_KEYS:demo-key}
+
+rate-limit:
+  capacity: ${APP_RATE_LIMIT_CAPACITY:3}
+  refill-tokens: ${APP_RATE_LIMIT_REFILL_TOKENS:100}
+  refill-period-seconds: ${APP_RATE_LIMIT_REFILL_PERIOD_SECONDS:60}
+
+spring:
+  flyway:
+    enabled: false
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/rag_chat_db}
+    username: ${SPRING_DATASOURCE_USERNAME:raguser}
+    password: ${SPRING_DATASOURCE_PASSWORD:ragpass}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+springdoc:
+  api-docs.path: /v3/api-docs
+  swagger-ui.path: /swagger-ui.html
+  persist-authorization: true
+logging:
+  level:
+    root: INFO
+    # Set to DEBUG or TRACE for more detailed output in services/controllers
+    com.northbay.ragchat: DEBUG
+    org.springframework.web: INFO
+    org.hibernate: INFO
+  pattern:
+    # A standardized pattern including timestamp, log level, thread, logger name, and message.
+    # This is easily parseable by centralized logging tools.
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss}", "level":"%p", "logger":"%c{1.}", "message":"%m"}%n'

@@ -1,0 +1,476 @@
+openapi: 3.0.3
+info:
+  title: NorthBay RAG Chat Service API
+  version: "1.0.0"
+  description: |
+    Official OpenAPI contract for the **NorthBay RAG Chat Service**.
+
+    ### Overview
+    This API enables clients to:
+    - Create, rename, list, and delete chat sessions.
+    - Add and retrieve chat messages within sessions.
+    - Mark sessions as favorites.
+    - Perform health checks for system readiness.
+
+    ### Security & Authentication
+    All endpoints require a valid API Key passed via the `X-API-KEY` header.
+    The backend supports multiple valid keys for environment-specific access.
+  contact:
+    name: NorthBay Developer Support
+    email: devops@northbay.com
+    url: https://northbay.com/support
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+externalDocs:
+  description: Full documentation & SDKs
+  url: https://northbay.com/docs/ragchat
+
+servers:
+  - url: http://localhost:8081
+    description: Local development
+
+security:
+  - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+      description: Valid API key read from environment variables.
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [timestamp, status, error, message, path, errorCode]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-10-24T10:00:00Z"
+        status:
+          type: integer
+          example: 404
+        error:
+          type: string
+          example: "Not Found"
+        errorCode:
+          type: string
+          description: Custom application error code
+          enum:
+            - INVALID_API_KEY
+            - SESSION_NOT_FOUND
+            - MESSAGE_NOT_FOUND
+            - RATE_LIMIT_EXCEEDED
+            - VALIDATION_ERROR
+            - INTERNAL_ERROR
+            - INVALID_INPUT
+          example: "SESSION_NOT_FOUND"
+        message:
+          type: string
+          example: "Chat session with id=1 not found"
+        path:
+          type: string
+          example: "/api/v1/chat-sessions/1/messages"
+
+    ChatSessionDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 101
+        title:
+          type: string
+          example: "Customer Chat Session"
+        owner:
+          type: string
+          example: "rpark"
+        favorite:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-10-23T12:30:00Z"
+
+    ChatMessageDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 201
+        sender:
+          type: string
+          example: "user"
+        content:
+          type: string
+          example: "Hello, can you help me?"
+        context:
+          type: string
+          nullable: true
+          description: Optional RAG context information.
+          example: "Doc#45 — 'Delivery takes 2–3 days.'"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-10-24T09:05:00Z"
+
+    ChatSessionCreateRequest:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          example: "New Product Inquiry"
+        owner:
+          type: string
+          example: "rpark"
+
+    ChatSessionUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "Renamed Inquiry"
+        favorite:
+          type: boolean
+          example: false
+
+    ChatMessageCreateRequest:
+      type: object
+      required: [sender, content]
+      properties:
+        sender:
+          type: string
+          description: "Sender (e.g., 'user' or 'ai')."
+          example: "ai"
+        content:
+          type: string
+          example: "What’s the delivery time for item X?"
+        context:
+          type: string
+          nullable: true
+          description: "Relevant RAG context used for AI responses."
+
+    ChatMessagePage:
+      description: Standard Spring Page wrapper.
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessageDTO"
+        page:
+          type: integer
+          example: 0
+        size:
+          type: integer
+          example: 20
+        totalElements:
+          type: integer
+          example: 10
+        totalPages:
+          type: integer
+          example: 1
+        first:
+          type: boolean
+          example: true
+        last:
+          type: boolean
+          example: false
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            timestamp: "2025-10-24T10:00:00Z"
+            status: 401
+            error: "Unauthorized"
+            errorCode: "INVALID_API_KEY"
+            message: "Invalid or missing API key"
+            path: "/api/v1/chat-sessions"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    TooManyRequests:
+      description: Rate limit exceeded
+      headers:
+        X-Rate-Limit-Limit:
+          description: Maximum requests allowed
+          schema:
+            type: integer
+            example: 100
+        X-Rate-Limit-Remaining:
+          description: Requests remaining in window
+          schema:
+            type: integer
+            example: 0
+        X-Rate-Limit-Reset:
+          description: Seconds until window reset
+          schema:
+            type: integer
+            example: 60
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            status: 429
+            errorCode: "RATE_LIMIT_EXCEEDED"
+            message: "Too many requests. Try again later."
+
+    InternalServerError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            status: 500
+            error: "Internal Server Error"
+            errorCode: "INTERNAL_ERROR"
+            message: "Unexpected error occurred"
+
+paths:
+  /api/v1/chat-sessions:
+    post:
+      tags: [Chat Sessions]
+      summary: Create a new chat session
+      operationId: createChatSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatSessionCreateRequest"
+            example:
+              title: "Customer Support Issue"
+              owner: "anupriya"
+      responses:
+        "201":
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatSessionDTO"
+        "400":
+          description: Invalid input (e.g., missing title)
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    get:
+      tags: [Chat Sessions]
+      summary: List all chat sessions
+      operationId: listChatSessions
+      parameters:
+        - name: owner
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter sessions by owner username
+      responses:
+        "200":
+          description: List of all chat sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatSessionDTO"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/v1/chat-sessions/{id}:
+    patch:
+      tags: [Chat Sessions]
+      summary: Update session title or favorite status
+      operationId: updateChatSession
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatSessionUpdateRequest"
+            example:
+              title: "Follow-up Session"
+              favorite: true
+      responses:
+        "200":
+          description: Session updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatSessionDTO"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      tags: [Chat Sessions]
+      summary: Delete a chat session and all its messages
+      operationId: deleteChatSession
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Session deleted successfully
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/v1/chat-sessions/{id}/messages:
+    get:
+      tags: [Chat Messages]
+      summary: Get paginated chat messages
+      operationId: getMessages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Paginated list of chat messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessagePage"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      tags: [Chat Messages]
+      summary: Add a message to a session
+      operationId: addMessage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatMessageCreateRequest"
+            example:
+              sender: "user"
+              content: "How long is the warranty?"
+      responses:
+        "201":
+          description: Message added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessageDTO"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/v1/chat-sessions/favorites:
+    get:
+      tags: [Chat Sessions]
+      summary: List all favorite chat sessions
+      operationId: listFavoriteSessions
+      responses:
+        "200":
+          description: Favorite chat sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatSessionDTO"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/v1/health:
+    get:
+      tags: [Health]
+      summary: Health check endpoint
+      operationId: healthCheck
+      responses:
+        "200":
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "UP"
+                  database:
+                    type: string
+                    example: "UP"
+        "503":
+          description: Service unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+tags:
+  - name: Chat Sessions
+    description: Manage chat sessions (CRUD, favorites)
+  - name: Chat Messages
+    description: Add and retrieve chat messages (with pagination)
+  - name: Health
+    description: Application and database readiness checks
