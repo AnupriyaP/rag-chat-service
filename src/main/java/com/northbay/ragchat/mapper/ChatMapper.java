@@ -14,9 +14,23 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
+/**
+ * Mapper interface for converting between entity and DTO objects used
+ * in the chat service.
+ * <p>
+ * This interface is implemented automatically by MapStruct at build time.
+ * It provides mappings for chat sessions and chat messages, handling
+ * type conversions such as {@link Instant} to {@link OffsetDateTime}.
+ */
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ChatMapper {
 
+    /**
+     * Converts a {@link ChatSession} entity to a {@link ChatSessionDTO}.
+     *
+     * @param entity the ChatSession entity
+     * @return the mapped ChatSessionDTO
+     */
     // Chat Session mappings
     @Mapping(source = "createdAt", target = "createdAt")
     ChatSessionDTO toSessionDTO(ChatSession entity);

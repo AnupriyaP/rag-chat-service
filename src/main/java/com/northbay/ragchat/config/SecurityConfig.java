@@ -5,7 +5,12 @@ import com.northbay.ragchat.security.RateLimitFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+/**
+ * Spring configuration class for registering and ordering security filters.
+ * <p>
+ * Ensures that all API endpoints under {@code /api/*} are protected by both
+ * API key validation and rate limiting filters, applied in the correct sequence.
+ */
 @Configuration
 public class SecurityConfig {
 

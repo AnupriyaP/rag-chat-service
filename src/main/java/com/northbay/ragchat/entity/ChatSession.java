@@ -7,6 +7,13 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+/**
+ * Entity representing a chat session in the RAG Chat Service.
+ * <p>
+ * A chat session groups multiple messages exchanged between a user
+ * and the system (or assistant). It includes session metadata such
+ * as title, owner, and favorite status.
+ */
 @Entity
 @Table(name = "chat_sessions")
 @Getter

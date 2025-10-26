@@ -8,6 +8,14 @@ import io.swagger.v3.oas.models.Components;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration class for OpenAPI (Swagger) documentation.
+ * <p>
+ * Defines API metadata and security settings for the NorthBay RAG Chat Service.
+ * <p>
+ * The API uses an API key for authentication, provided in the
+ * {@code X-API-KEY} HTTP header.
+ */
 @Configuration
 public class OpenApiConfig {
 

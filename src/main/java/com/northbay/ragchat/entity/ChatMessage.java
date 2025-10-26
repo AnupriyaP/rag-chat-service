@@ -4,7 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.OffsetDateTime;
 import java.time.Instant;
-
+/**
+ * Entity representing an individual chat message within a chat session.
+ * <p>
+ * Each message belongs to a {@link ChatSession} and includes the sender,
+ * message content, optional context, and timestamps for creation and updates.
+ */
 @Entity
 @Table(name = "chat_messages")
 @Getter

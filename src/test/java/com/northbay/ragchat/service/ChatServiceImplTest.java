@@ -17,14 +17,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-
 import java.util.List;
 import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-
+/**
+ * Unit tests for the {@link ChatServiceImpl} class.
+ * <p>
+ * Verifies CRUD operations and message handling within chat sessions
+ * using mocked repositories and mapper components.
+ */
 @ExtendWith(MockitoExtension.class)
 class ChatServiceImplTest {
 

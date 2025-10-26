@@ -2,6 +2,12 @@ package com.northbay.ragchat.exception;
 
 import java.time.OffsetDateTime;
 
+/**
+ * Model class representing a standardized API error response.
+ * <p>
+ * Contains details such as timestamp, HTTP status code, error type,
+ * descriptive message, and the request path where the error occurred.
+ */
 public class ErrorResponse {
     private OffsetDateTime timestamp = OffsetDateTime.now();
     private int status;

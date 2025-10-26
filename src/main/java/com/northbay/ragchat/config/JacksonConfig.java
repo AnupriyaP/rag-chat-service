@@ -6,7 +6,16 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.openapitools.jackson.nullable.JsonNullableModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+/**
+ * Spring configuration class for customizing the Jackson {@link ObjectMapper}.
+ * <p>
+ * Registers additional modules to support:
+ * <ul>
+ *   <li>OpenAPI's {@code JsonNullable} types</li>
+ *   <li>Java 8+ date/time classes such as {@code OffsetDateTime} and {@code Instant}</li>
+ * </ul>
+ * Disables timestamp serialization for date/time values to ensure ISO-8601 format in JSON.
+ */
 @Configuration
 public class JacksonConfig {
 

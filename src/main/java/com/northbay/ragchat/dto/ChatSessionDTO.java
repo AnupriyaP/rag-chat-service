@@ -4,6 +4,14 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import jakarta.validation.constraints.NotBlank;
 
+/**
+ * Data Transfer Object (DTO) representing a chat session.
+ * <p>
+ * Used to transfer session data between the backend and clients
+ * without exposing entity details. A session contains metadata
+ * such as title, owner, and favorite status, as well as a list of
+ * associated chat messages.
+ */
 public class ChatSessionDTO {
     private Long id;
 

@@ -15,6 +15,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
+/**
+ * Servlet filter for logging HTTP request and response details.
+ * <p>
+ * Logs essential request and response metadata such as:
+ * method, path, status code, duration, and body content (truncated if too large).
+ * <p>
+ * Uses {@link ContentCachingRequestWrapper} and {@link ContentCachingResponseWrapper}
+ * to safely read request and response bodies without consuming the streams.
+ */
 @Component
 public class RequestResponseLoggingFilter extends OncePerRequestFilter {
 

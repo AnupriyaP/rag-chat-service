@@ -36,3 +36,9 @@ logging:
     # A standardized pattern including timestamp, log level, thread, logger name, and message.
     # This is easily parseable by centralized logging tools.
     console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss}", "level":"%p", "logger":"%c{1.}", "message":"%m"}%n'
+
+#jasypt:
+ # encryptor:
+  #  password: ${JASYPT_ENCRYPTOR_PASSWORD}
+   # algorithm: PBEWithMD5AndDES
+    #string-output-type: base64

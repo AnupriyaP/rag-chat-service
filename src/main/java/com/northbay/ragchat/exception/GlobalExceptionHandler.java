@@ -13,6 +13,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.OffsetDateTime;
 import java.util.stream.Collectors;
 
+/**
+ * Global exception handler for the RAG Chat Service.
+ * <p>
+ * Handles and transforms exceptions into consistent API error responses.
+ * This class ensures all errors are returned in a structured format and properly logged.
+ */
 @Slf4j // ✅ ADDED Lombok logger
 @RestControllerAdvice
 public class GlobalExceptionHandler {

@@ -15,6 +15,12 @@ import lombok.extern.slf4j.Slf4j; // ✅ NEW IMPORT
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of the {@link ChatService} interface.
+ * <p>
+ * Handles all business logic for chat sessions and chat messages,
+ * including creation, retrieval, updates, and deletion.
+ */
 @Slf4j // ✅ ADDED Lombok logger
 @Service
 public class ChatServiceImpl implements ChatService {
@@ -30,6 +36,12 @@ public class ChatServiceImpl implements ChatService {
         log.info("ChatServiceImpl initialized and ready."); // ✅ LOGGED
     }
 
+    /**
+     * Creates a new chat session.
+     *
+     * @param request the session creation request
+     * @return the created chat session as a DTO
+     */
     @Override
     public ChatSessionDTO createChatSession(ChatSessionCreateRequest request) {
         log.debug("Service: Creating session with title '{}' for owner '{}'", request.getTitle(), request.getOwner()); // ✅ LOGGED
@@ -42,6 +54,12 @@ public class ChatServiceImpl implements ChatService {
         return mapper.toSessionDTO(session);
     }
 
+    /**
+     * Returns all chat sessions for a given owner, or all sessions if no owner is provided.
+     *
+     * @param owner the owner of the sessions (optional)
+     * @return list of chat sessions
+     */
     @Override
     public List<ChatSessionDTO> listChatSessions(String owner) {
         List<ChatSession> sessions = (owner != null)
@@ -50,6 +68,14 @@ public class ChatServiceImpl implements ChatService {
         return mapper.toSessionDTOList(sessions);
     }
 
+    /**
+     * Updates a chat session (title or favorite flag).
+     *
+     * @param id      the session ID
+     * @param request the update request
+     * @return the updated chat session as a DTO
+     * @throws EntityNotFoundException if the session does not exist
+     */
     @Override
     public ChatSessionDTO updateChatSession(Long id, ChatSessionUpdateRequest request) {
         ChatSession session = sessionRepo.findById(id)
@@ -60,6 +86,12 @@ public class ChatServiceImpl implements ChatService {
         return mapper.toSessionDTO(session);
     }
 
+    /**
+     * Deletes a chat session by ID.
+     *
+     * @param id the session ID
+     * @throws EntityNotFoundException if the session does not exist
+     */
     @Override
     public void deleteChatSession(Long id) {
         log.warn("Service: Attempting to delete chat session with ID: {}", id); // ✅ LOGGED
@@ -69,11 +101,24 @@ public class ChatServiceImpl implements ChatService {
         sessionRepo.deleteById(id);
     }
 
+    /**
+     * Retrieves all sessions marked as favorite.
+     *
+     * @return list of favorite sessions
+     */
     @Override
     public List<ChatSessionDTO> listFavoriteSessions() {
         return mapper.toSessionDTOList(sessionRepo.findByFavoriteTrue());
     }
 
+    /**
+     * Adds a new message to a specific chat session.
+     *
+     * @param sessionId the ID of the chat session
+     * @param request   the message creation request
+     * @return the created message as a DTO
+     * @throws EntityNotFoundException if the session does not exist
+     */
     @Override
     public ChatMessageDTO addMessage(Long sessionId, ChatMessageCreateRequest request) {
         ChatSession session = sessionRepo.findById(sessionId)
@@ -92,6 +137,15 @@ public class ChatServiceImpl implements ChatService {
         return mapper.toMessageDTO(msg);
     }
 
+    /**
+     * Retrieves paginated chat messages for a given session.
+     *
+     * @param sessionId the ID of the chat session
+     * @param page      the page number
+     * @param size      the number of messages per page
+     * @return a paginated list of messages wrapped in {@link ChatMessagePage}
+     * @throws EntityNotFoundException if the session does not exist
+     */
     @Override
     public ChatMessagePage getMessages(Long sessionId, Integer page, Integer size) {
         ChatSession session = sessionRepo.findById(sessionId)

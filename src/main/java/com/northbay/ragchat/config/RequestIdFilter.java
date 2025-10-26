@@ -6,7 +6,15 @@ import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.UUID;
-
+/**
+ * Servlet filter that attaches a unique request identifier (Request ID)
+ * to each incoming HTTP request for logging and tracing purposes.
+ * <p>
+ * If the client provides an {@code X-Request-Id} header, it is reused;
+ * otherwise, a new UUID is generated. The ID is stored in the
+ * Mapped Diagnostic Context (MDC) so it appears automatically
+ * in all log entries for the current request.
+ */
 @Component
 public class RequestIdFilter implements Filter {
     @Override

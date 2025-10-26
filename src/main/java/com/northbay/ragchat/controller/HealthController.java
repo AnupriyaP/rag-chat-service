@@ -5,6 +5,12 @@ import com.northbay.ragchat.model.HealthCheck200Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Controller for application health checks.
+ * <p>
+ * Provides an endpoint to verify that the service and its dependencies
+ * (such as the database) are operational.
+ */
 @RestController
 public class HealthController implements HealthApi {
 

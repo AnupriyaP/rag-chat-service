@@ -12,7 +12,16 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-
+/**
+ * Servlet filter for applying rate limiting using Bucket4j.
+ * <p>
+ * This filter limits the number of API requests per API key within
+ * a given time window to prevent abuse and ensure fair usage.
+ *
+ * <p>
+ * Public endpoints (e.g., Swagger UI, health checks) are excluded
+ * from rate limiting.
+ */
 @Slf4j // ✅ ADDED Lombok logger
 @Component
 public class RateLimitFilter extends OncePerRequestFilter {
@@ -39,6 +48,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
             "/error"
     );
 
+/**
+ * Resolves or creates a rate limit bucket for the given API key.
+ *
+ * @param key the API key identifying a client
+ * @return the {@link Bucket} associated with the key
+ */
     private Bucket resolveBucket(String key) {
         return cache.computeIfAbsent(key, k -> {
             Refill refillPolicy = Refill.intervally(refill, Duration.ofSeconds(periodSeconds));
@@ -47,6 +62,19 @@ public class RateLimitFilter extends OncePerRequestFilter {
         });
     }
 
+    /**
+     * Applies rate limiting logic for each incoming HTTP request.
+     * <p>
+     * Requests to public paths bypass rate limiting.
+     * Requests without an API key are rejected with a 401 Unauthorized status.
+     * Requests exceeding the rate limit receive a 429 Too Many Requests response.
+     *
+     * @param req   the incoming HTTP request
+     * @param res   the HTTP response
+     * @param chain the filter chain to continue processing
+     * @throws ServletException if a servlet error occurs
+     * @throws IOException      if an I/O error occurs
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws ServletException, IOException {
 
