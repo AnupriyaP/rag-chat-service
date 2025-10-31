@@ -1,13 +1,18 @@
+/*
 package com.northbay.ragchat.dto;
-import java.time.OffsetDateTime;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import java.time.OffsetDateTime;
+
+*/
 /**
  * Data Transfer Object (DTO) representing a chat message.
  * <p>
  * Used to transfer message data between the backend and clients
  * without exposing internal entity details.
- */
+ *//*
+
 public class ChatMessageDTO {
 
 
@@ -32,3 +37,4 @@ public class ChatMessageDTO {
     public OffsetDateTime getUpdatedAt(){return updatedAt;} public void setUpdatedAt(OffsetDateTime updatedAt){this.updatedAt=updatedAt;}
 
 }
+*/

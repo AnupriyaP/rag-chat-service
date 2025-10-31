@@ -354,6 +354,9 @@ paths:
     get:
       tags: [Chat Messages]
       summary: Get paginated chat messages
+      description: >
+        If `sender` is `user`, the service will call the Groq LLM to generate an assistant response;
+        the assistant response will be persisted to the session and returned in the response.
       operationId: getMessages
       parameters:
         - name: id

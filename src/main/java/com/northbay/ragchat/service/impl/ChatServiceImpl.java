@@ -7,6 +7,7 @@ import com.northbay.ragchat.model.*;
 import com.northbay.ragchat.repository.ChatMessageRepository;
 import com.northbay.ragchat.repository.ChatSessionRepository;
 import com.northbay.ragchat.service.ChatService;
+import com.northbay.ragchat.service.GroqLLMService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,11 +29,13 @@ public class ChatServiceImpl implements ChatService {
     private final ChatSessionRepository sessionRepo;
     private final ChatMessageRepository messageRepo;
     private final ChatMapper mapper;
+    private final GroqLLMService groqLLMService;
 
-    public ChatServiceImpl(ChatSessionRepository sessionRepo, ChatMessageRepository messageRepo, ChatMapper mapper) {
+    public ChatServiceImpl(ChatSessionRepository sessionRepo, ChatMessageRepository messageRepo, ChatMapper mapper, GroqLLMService groqLLMService) {
         this.sessionRepo = sessionRepo;
         this.messageRepo = messageRepo;
         this.mapper = mapper;
+        this.groqLLMService = groqLLMService;
         log.info("ChatServiceImpl initialized and ready."); // ✅ LOGGED
     }
 
@@ -134,6 +137,30 @@ public class ChatServiceImpl implements ChatService {
                 .build();
 
         messageRepo.save(msg);
+        if ("user".equalsIgnoreCase(request.getSender())) {
+            try {
+                log.debug("Calling Groq LLM for session {} message id {}", sessionId, msg.getId());
+                String assistantText = groqLLMService.generateCompletion(request.getContent());
+
+                ChatMessage assistant = ChatMessage.builder()
+                        .session(session)
+                        .sender("assistant")
+                        .content(assistantText)
+                        .context("{\"source\":\"groq\",\"model\":\"" + System.getenv().getOrDefault("GROQ_MODEL","llama3-70b-8192") + "\"}")
+                        .build();
+
+                messageRepo.save(assistant);
+
+                return mapper.toMessageDTO(assistant);
+
+            } catch (Exception e) {
+                log.error("Error calling Groq LLM: {}", e.getMessage(), e);
+                // Fallback: return the stored user message DTO so the client still gets the persisted message
+                return mapper.toMessageDTO(msg);
+            }
+        }
+
+        // Non-user senders: return the stored message DTO
         return mapper.toMessageDTO(msg);
     }
 

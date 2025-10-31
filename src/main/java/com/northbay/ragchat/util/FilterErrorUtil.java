@@ -1,47 +1,34 @@
+/*
 package com.northbay.ragchat.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.northbay.ragchat.exception.ErrorResponse;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-public final class FilterErrorUtil {
+public class FilterErrorUtil {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
 
-    private FilterErrorUtil() {
-        // Private constructor to prevent instantiation
-    }
+    public static void sendError(HttpServletResponse res, HttpServletRequest req,
+                                 HttpStatus status, String errorCode, String message) throws IOException {
+        res.setStatus(status.value());
+        res.setContentType("application/json");
 
-    /**
-     * Writes a standardized JSON ErrorResponse to the HttpServletResponse.
-     * @param response The servlet response object.
-     * @param status The HTTP status (e.g., 401, 429).
-     * @param message The user-friendly message.
-     * @param errorCode The application-specific error code.
-     * @param path The request URI.
-     * @throws IOException
-     */
-    public static void writeError(HttpServletResponse response, HttpStatus status, String message, String errorCode, String path) throws IOException {
-        response.setStatus(status.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", Instant.now().toString());
+        body.put("status", status.value());
+        body.put("error", status.getReasonPhrase());
+        body.put("errorCode", errorCode);
+        body.put("message", message);
+        body.put("path", req.getRequestURI());
 
-        // NOTE: If ErrorResponse has a dedicated field for errorCode, use it here.
-        // Based on your current ErrorResponse model, we'll embed the errorCode in the message for demonstration.
-        // A better approach is to modify ErrorResponse to have a 'code' field.
-        String finalMessage = String.format("[%s] %s", errorCode, message);
-
-        ErrorResponse error = new ErrorResponse(
-                status.value(),
-                status.getReasonPhrase(),
-                finalMessage,
-                path
-        );
-
-        // Using Jackson's ObjectMapper to write the JSON response
-        response.getWriter().write(MAPPER.writeValueAsString(error));
+        mapper.writeValue(res.getOutputStream(), body);
     }
 }
+*/

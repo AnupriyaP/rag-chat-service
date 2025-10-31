@@ -29,7 +29,7 @@ services:
     depends_on:
       - postgres
     networks:
-      - monitor_net
+        - monitor_net
 
   # --------------------------
   # APP SERVICE

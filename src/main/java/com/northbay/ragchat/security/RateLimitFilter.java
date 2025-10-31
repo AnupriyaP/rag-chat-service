@@ -1,10 +1,10 @@
 package com.northbay.ragchat.security;
-
 import io.github.bucket4j.*;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import lombok.extern.slf4j.Slf4j; // ✅ NEW IMPORT
@@ -101,7 +101,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
         } else {
             log.warn("Rate limit exceeded for key: {}. Path: {}", key, path); // ✅ LOGGED
             // The 429 status is correctly handled via sendError, avoiding the 500 error.
-            res.sendError(429,"Too many requests");
+           res.sendError(429,"Too many requests");
+           // FilterErrorUtil.sendError(res, req, HttpStatus.TOO_MANY_REQUESTS, "RATE_LIMIT_EXCEEDED", "Too many requests, slow down.");
         }
     }
 }

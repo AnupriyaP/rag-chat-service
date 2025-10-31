@@ -1,9 +1,11 @@
+/*
 package com.northbay.ragchat.dto;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 import jakarta.validation.constraints.NotBlank;
 
+*/
 /**
  * Data Transfer Object (DTO) representing a chat session.
  * <p>
@@ -11,7 +13,8 @@ import jakarta.validation.constraints.NotBlank;
  * without exposing entity details. A session contains metadata
  * such as title, owner, and favorite status, as well as a list of
  * associated chat messages.
- */
+ *//*
+
 public class ChatSessionDTO {
     private Long id;
 
@@ -31,3 +34,4 @@ public class ChatSessionDTO {
     public OffsetDateTime getCreatedAt(){return createdAt;} public void setCreatedAt(OffsetDateTime createdAt){this.createdAt=createdAt;}
     public List<ChatMessageDTO> getMessages(){return messages;} public void setMessages(List<ChatMessageDTO> messages){this.messages=messages;}
 }
+*/

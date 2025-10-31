@@ -1,6 +1,5 @@
 package com.northbay.ragchat.security;
 
-import com.northbay.ragchat.util.FilterErrorUtil;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -87,7 +86,10 @@ public class ApiKeyFilter extends OncePerRequestFilter {
         if (key == null || !validKeys.contains(key)) {
             res.setStatus(HttpStatus.UNAUTHORIZED.value());
             res.setContentType("application/json");
-            res.getWriter().write("{\"error\":\"Unauthorized - invalid API key\"}");
+            //res.getWriter().write("{\"error\":\"Unauthorized - invalid API key\"}");
+            res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or invalid API key");
+           // FilterErrorUtil.sendError(res, req, HttpStatus.TOO_MANY_REQUESTS, "RATE_LIMIT_EXCEEDED", "Too many requests, slow down.");
+
             return;
         }
 
