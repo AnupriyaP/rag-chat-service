@@ -23,6 +23,22 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * 1️⃣ Handles custom ApiException (business or integration layer errors).
+     */
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ErrorResponse> handleApiException(ApiException ex, HttpServletRequest req) {
+        log.error("API Exception at {} -> {}", req.getRequestURI(), ex.getMessage(), ex);
+
+        ErrorResponse error = buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                ErrorResponse.ErrorCodeEnum.API_ERROR,
+                req.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
     // 1. Handle JpaRepository Entity Not Found Errors (404)
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(EntityNotFoundException ex, HttpServletRequest req) {

@@ -12,14 +12,16 @@ rate-limit:
 
 spring:
   flyway:
-    enabled: false
+    enabled: true
+    classpath: db/migration
+    baseline-on-migrate: false
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/rag_chat_db}
     username: ${SPRING_DATASOURCE_USERNAME:raguser}
     password: ${SPRING_DATASOURCE_PASSWORD:ragpass}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: false
 springdoc:
   api-docs.path: /v3/api-docs
@@ -37,6 +39,29 @@ logging:
     # This is easily parseable by centralized logging tools.
     console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss}", "level":"%p", "logger":"%c{1.}", "message":"%m"}%n'
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: rag-chat-service
+
+# ===========================
+#  Info Endpoint (Actuator)
+# ===========================
+info:
+  app:
+    name: rag-chat-service
+    description: RAG Chat microservice backend for AI-driven conversation handling
+    version: 1.0.0
+    environment: ${SPRING_PROFILES_ACTIVE:local}
+    author: Northbay Team
+
 #jasypt:
  # encryptor:
   #  password: ${JASYPT_ENCRYPTOR_PASSWORD}
@@ -46,4 +71,5 @@ groq:
   api:
     url: https://api.groq.com/openai/v1/chat/completions
     key: ${GROQ_API_KEY}
-  model: ${GROQ_MODEL:llama-3.3-70b-versatile}
+  model: ${GROQ_MODEL}
+  system-prompt: ${GROQ_SYSTEM_PROMPT}

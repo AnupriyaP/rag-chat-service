@@ -17,4 +17,22 @@ public class ApiException extends RuntimeException {
     public String getErrorCode() {
         return errorCode;
     }
+
+    // ✅ Constructor: message only
+    public ApiException(String message) {
+        super(message);
+        this.errorCode = null;
+    }
+
+    // ✅ Constructor: message + cause (for wrapping other exceptions)
+    public ApiException(String message, Throwable cause) {
+        super(message, cause);
+        this.errorCode = null;
+    }
+
+    // ✅ Constructor: errorCode + message + cause
+    public ApiException(String errorCode, String message, Throwable cause) {
+        super(message, cause);
+        this.errorCode = errorCode;
+    }
 }

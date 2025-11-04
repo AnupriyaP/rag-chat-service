@@ -67,6 +67,7 @@ components:
             - VALIDATION_ERROR
             - INTERNAL_ERROR
             - INVALID_INPUT
+            - API_ERROR
           example: "SESSION_NOT_FOUND"
         message:
           type: string

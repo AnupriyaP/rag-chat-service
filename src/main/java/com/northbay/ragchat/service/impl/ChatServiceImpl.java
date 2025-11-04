@@ -7,7 +7,7 @@ import com.northbay.ragchat.model.*;
 import com.northbay.ragchat.repository.ChatMessageRepository;
 import com.northbay.ragchat.repository.ChatSessionRepository;
 import com.northbay.ragchat.service.ChatService;
-import com.northbay.ragchat.service.GroqLLMService;
+import com.northbay.ragchat.service.LLMService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,13 +29,13 @@ public class ChatServiceImpl implements ChatService {
     private final ChatSessionRepository sessionRepo;
     private final ChatMessageRepository messageRepo;
     private final ChatMapper mapper;
-    private final GroqLLMService groqLLMService;
+    private final LLMService llmService;        // injected by interface type
 
-    public ChatServiceImpl(ChatSessionRepository sessionRepo, ChatMessageRepository messageRepo, ChatMapper mapper, GroqLLMService groqLLMService) {
+    public ChatServiceImpl(ChatSessionRepository sessionRepo, ChatMessageRepository messageRepo, ChatMapper mapper, LLMService llmService) {
         this.sessionRepo = sessionRepo;
         this.messageRepo = messageRepo;
         this.mapper = mapper;
-        this.groqLLMService = groqLLMService;
+        this.llmService = llmService;
         log.info("ChatServiceImpl initialized and ready."); // ✅ LOGGED
     }
 
@@ -138,10 +138,16 @@ public class ChatServiceImpl implements ChatService {
 
         messageRepo.save(msg);
         if ("user".equalsIgnoreCase(request.getSender())) {
+            String assistantText;
             try {
                 log.debug("Calling Groq LLM for session {} message id {}", sessionId, msg.getId());
-                String assistantText = groqLLMService.generateCompletion(request.getContent());
-
+                assistantText = llmService.generateResponse(request.getContent());
+            }
+            catch (Exception e) {
+                log.error("Error calling Groq LLM: {}", e.getMessage(), e);
+                // Fallback: return the stored user message DTO so the client still gets the persisted message
+                assistantText = "[Error: Unable to generate AI response at this time]";
+            }
                 ChatMessage assistant = ChatMessage.builder()
                         .session(session)
                         .sender("assistant")
@@ -153,11 +159,7 @@ public class ChatServiceImpl implements ChatService {
 
                 return mapper.toMessageDTO(assistant);
 
-            } catch (Exception e) {
-                log.error("Error calling Groq LLM: {}", e.getMessage(), e);
-                // Fallback: return the stored user message DTO so the client still gets the persisted message
-                return mapper.toMessageDTO(msg);
-            }
+
         }
 
         // Non-user senders: return the stored message DTO

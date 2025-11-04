@@ -29,7 +29,6 @@ public class OpenApiConfig {
                         .description("""
                             Use the "Authorize" button above and enter your API key.
                             Header name: **X-API-KEY**
-                            Default value: **demo-key**
                         """))
                 .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .components(new Components()
